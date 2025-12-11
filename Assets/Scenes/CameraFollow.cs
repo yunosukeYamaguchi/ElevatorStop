@@ -2,7 +2,7 @@ using UnityEngine;
 
 public class CameraFollowY : MonoBehaviour
 {
-    public Transform target; 
+    public Transform target = null; 
     public float smoothSpeed = 0.1f;
 
     private float initialYOffset;
@@ -10,7 +10,7 @@ public class CameraFollowY : MonoBehaviour
 
     void Start()
     {
-        initialYOffset = transform.position.y - target.position.y;
+        initialYOffset = transform.position.y;
     }
 
     void LateUpdate()

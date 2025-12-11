@@ -24,12 +24,32 @@ public class FallingBox : MonoBehaviour
     public GameManager GameManager;
     public CameraShake cameraShake;
 
+    private Coroutine slowDownCoroutine;
+
+    public GameObject window_fail;
+    public GameObject monitor;
+
     void Start()
     {
+        window_fail.SetActive(false);
+        monitor.SetActive(true);
+
         rb = GetComponent<Rigidbody2D>();
         rb.isKinematic = true;
+    }
 
-        StartCoroutine(PlayStartThenFall());
+    void Update()
+    {
+        if (Input.GetKeyDown(KeyCode.Return))
+        {
+            StartCoroutine(PlayStartThenFall());
+            monitor.SetActive(false);
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            OnPlayerPressedStop();
+        }
     }
 
     IEnumerator PlayStartThenFall()
@@ -48,14 +68,6 @@ public class FallingBox : MonoBehaviour
         loopSource.loop = true;
         loopSource.volume = 1f;
         loopSource.Play();
-    }
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.Space))
-        {
-            OnPlayerPressedStop();
-        }
     }
 
     // -------------------------------------------------------
@@ -79,13 +91,10 @@ public class FallingBox : MonoBehaviour
         isStopped = true;
 
         // 5秒かけて停止
-        StartCoroutine(SlowDownMovement());
+        slowDownCoroutine = StartCoroutine(SlowDownMovement());
 
         // 風音フェードアウト
         StartCoroutine(FadeOutWind());
-
-        // 成功/失敗判定実行
-        JudgeSuccessOrFail();
     }
 
     // -------------------------------------------------------
@@ -101,22 +110,24 @@ public class FallingBox : MonoBehaviour
 
             loopSource.Stop();
 
-            // stop を押していない時だけ衝突音を鳴らす
-            if (!isStopped)
-            {
-                oneShotSource.PlayOneShot(collisionClip);
-            }
+            oneShotSource.PlayOneShot(collisionClip);
 
             cameraShake?.ShakeCamera();
 
             rb.linearVelocity = Vector2.zero;
             rb.isKinematic = true;
 
-            // stop を押していないまま衝突 → 失敗確定
-            if (!isStopped)
+            if (slowDownCoroutine != null)
             {
-                GameManager.Fail();
+                StopCoroutine(slowDownCoroutine);
+                slowDownCoroutine = null;
+                // 即停止したときの処理
+                rb.linearVelocity = Vector2.zero;
+                rb.isKinematic = true;
             }
+
+            window_fail.SetActive(true);
+            GameManager.Fail();
         }
     }
 
@@ -131,16 +142,21 @@ public class FallingBox : MonoBehaviour
             return;
         }
 
-        bool isOverlap = bottomLine.IsTouching(targetLine);
+        bool isOverlap = false;
+
+        if (100f > GameManager.distance)
+        {
+            isOverlap = true;
+        }
 
         if (isOverlap)
         {
-            Debug.Log("成功！");
+            Debug.Log("FallingBox 成功");
             GameManager.Success();
         }
         else
         {
-            Debug.Log("失敗！");
+            Debug.Log("FallingBox 失敗");
             GameManager.Fail();
         }
     }
@@ -185,5 +201,8 @@ public class FallingBox : MonoBehaviour
 
         rb.linearVelocity = Vector2.zero;
         rb.isKinematic = true;
+
+        // 成功/失敗判定実行
+        JudgeSuccessOrFail();
     }
 }
