@@ -1,5 +1,6 @@
 using UnityEngine;
 using System.Collections;
+using UnityEngine.SceneManagement;
 
 public class FallingBox : MonoBehaviour
 {
@@ -28,11 +29,13 @@ public class FallingBox : MonoBehaviour
 
     public GameObject window_fail;
     public GameObject monitor;
+    private bool start = false;
 
     void Start()
     {
         window_fail.SetActive(false);
         monitor.SetActive(true);
+        start = false;
 
         rb = GetComponent<Rigidbody2D>();
         rb.isKinematic = true;
@@ -40,15 +43,26 @@ public class FallingBox : MonoBehaviour
 
     void Update()
     {
-        if (Input.GetKeyDown(KeyCode.Return))
+        if (start)
         {
-            StartCoroutine(PlayStartThenFall());
-            monitor.SetActive(false);
+            if (Input.GetKeyDown(KeyCode.Space))
+            {
+                OnPlayerPressedStop();
+            }
         }
 
-        if (Input.GetKeyDown(KeyCode.Space))
+        if (!start)
         {
-            OnPlayerPressedStop();
+            if (Input.GetKeyDown(KeyCode.Return))
+            {
+                StartCoroutine(PlayStartThenFall());
+                monitor.SetActive(false);
+            }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            SceneManager.LoadScene(SceneManager.GetActiveScene().buildIndex);
         }
     }
 
@@ -68,6 +82,8 @@ public class FallingBox : MonoBehaviour
         loopSource.loop = true;
         loopSource.volume = 1f;
         loopSource.Play();
+
+        start = true;
     }
 
     // -------------------------------------------------------
@@ -144,7 +160,7 @@ public class FallingBox : MonoBehaviour
 
         bool isOverlap = false;
 
-        if (100f > GameManager.distance)
+        if (50f > GameManager.distance)
         {
             isOverlap = true;
         }

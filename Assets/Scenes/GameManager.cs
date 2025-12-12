@@ -27,7 +27,7 @@ public class GameManager : MonoBehaviour
         if(!gameEnd)
         {
             // 小数1桁で表示（例：2.3m）
-            distanceText.text = $"10m以内で止めろ！\n\n地上まで\n{(distance / 10):F1}m";
+            distanceText.text = $"5m以内で止めろ！\n\n地上まで\n{(distance / 10):F1}m";
         }
     }
 
