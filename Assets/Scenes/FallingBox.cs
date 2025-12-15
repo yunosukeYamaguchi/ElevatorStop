@@ -45,10 +45,19 @@ public class FallingBox : MonoBehaviour
     {
         if (start)
         {
-            if (Input.GetKeyDown(KeyCode.Space))
+            for (KeyCode key = KeyCode.Keypad0; key <= KeyCode.Keypad9; key++)
             {
-                OnPlayerPressedStop();
+                if (Input.GetKeyDown(key))
+                {
+                    OnPlayerPressedStop();
+                    break;
+                }
             }
+        }
+
+        if (Input.GetKeyDown(KeyCode.Space))
+        {
+            OnPlayerPressedStop();
         }
 
         if (!start)
